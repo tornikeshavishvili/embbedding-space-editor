@@ -122,6 +122,59 @@ export function computePCA2D(items, dim, prevW = null) {
 
   const e2 = powerIterationSymmetric(C2, 80, prevW?.[1] ?? null);
 
+// --- DEGENERATE_PCA_FALLBACK ---
+// With very few items (e.g. 2 points) the covariance is rank-1 and the 2nd component
+// can collapse to ~0, which makes everything lie on a single horizontal line.
+// To keep the plot usable, we force a stable orthonormal 2D basis.
+const nItems = items.length;
+const eps = 1e-10;
+
+function norm(v) {
+  let s = 0; for (let i = 0; i < v.length; i++) s += v[i] * v[i];
+  return Math.sqrt(s);
+}
+
+function dot(a,b) {
+  let s = 0; for (let i = 0; i < a.length; i++) s += a[i] * b[i];
+  return s;
+}
+
+function sub(a,b,k) { // a - k*b
+  const out = Array(a.length);
+  for (let i = 0; i < a.length; i++) out[i] = a[i] - k * b[i];
+  return out;
+}
+
+function normalize(v) {
+  const n = Math.max(eps, norm(v));
+  for (let i = 0; i < v.length; i++) v[i] /= n;
+  return v;
+}
+
+// If too few items or component-2 is near-zero, build W2 orthogonal to W1
+if (nItems < 3 || !e2.v || norm(e2.v) < eps || Math.abs(e2.lambda) < eps) {
+  // choose a deterministic axis that is not collinear with W1
+  let axis = zeros(dim);
+  let bestI = 0;
+  let bestAbs = Math.abs(e1.v[0] ?? 0);
+  for (let i = 1; i < dim; i++) {
+    const a = Math.abs(e1.v[i] ?? 0);
+    if (a < bestAbs) { bestAbs = a; bestI = i; } // pick smallest component
+  }
+  axis[bestI] = 1;
+
+  // Gram-Schmidt: w2 = axis - (axis·w1) w1
+  let w2 = sub(axis, e1.v, dot(axis, e1.v));
+  if (norm(w2) < eps) {
+    // fallback: another axis
+    axis = zeros(dim);
+    axis[(bestI + 1) % dim] = 1;
+    w2 = sub(axis, e1.v, dot(axis, e1.v));
+  }
+  normalize(w2);
+  e2.v = w2;
+}
+
   enforceStableSign(e1.v);
   enforceStableSign(e2.v);
 
