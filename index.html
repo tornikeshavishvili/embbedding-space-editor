@@ -1,0 +1,99 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Embedding Space Builder</title>
+  <link rel="stylesheet" href="./styles.css" />
+</head>
+<body>
+  <div class="app">
+    <!-- LEFT: builder + items -->
+    <div class="panel">
+      <h2>Embedding Pack</h2>
+
+      <label>Vector dimension (D)</label>
+      <div class="row">
+        <input id="dimInput" type="number" min="2" max="256" value="8" />
+        <button id="resizeBtn">Resize vectors</button>
+      </div>
+
+      <label>Item editor</label>
+      <div class="row">
+        <input id="textInput" placeholder="text" />
+        <select id="typeInput">
+          <option value="word">word</option>
+          <option value="phrase">phrase</option>
+          <option value="token">js-token</option>
+          <option value="ast">ast-op</option>
+        </select>
+      </div>
+      <div class="row">
+        <input id="tokenInput" placeholder="token/op (optional)" />
+        <button id="addBtn">Add</button>
+        <button id="newBtn">New</button>
+      </div>
+
+      <label>Items</label>
+      <input id="searchInput" placeholder="search..." />
+      <div class="list" id="list"></div>
+    </div>
+
+    <!-- RIGHT: canvas + inspector -->
+    <div class="main">
+      <div class="bar">
+        <button id="pcaBtn">Recompute PCA view</button>
+        <button id="centerBtn">Center + PCA</button>
+        <button id="resetViewBtn">Reset view</button>
+      </div>
+
+      <div class="content">
+        <div class="canvasWrap">
+          <canvas id="plot" width="1200" height="700"></canvas>
+        </div>
+
+        <div class="inspector">
+          <h2>Selected item</h2>
+          <div id="selectedMeta" class="muted">No item selected.</div>
+
+          <label>Vector (comma/space separated)</label>
+          <textarea id="vectorArea" class="mono"></textarea>
+
+          <div class="row3">
+            <button id="randomBtn">Randomize</button>
+            <button id="normalizeBtn">Normalize</button>
+            <button id="saveVecBtn">Save vector</button>
+          </div>
+
+          <label>Nearest neighbors (cosine)</label>
+          <div id="neighbors"></div>
+
+          <h2>Import / Export</h2>
+          <div class="row">
+            <button id="exportBtn">Export JSON</button>
+            <button id="importBtn">Import JSON</button>
+          </div>
+          <input id="importFiles" type="file" multiple accept="application/json,.json" />
+          <div class="muted small" id="importHint">Tip: select multiple JSON packs to merge.</div>
+          <textarea id="jsonArea" class="mono" placeholder="Paste exported JSON here to import..."></textarea>
+        </div>
+      </div>
+
+      <div class="footer">
+        <div class="small">
+          <span class="pill">Cosine similarity</span>
+          <span class="pill">PCA 2D</span>
+          <span class="pill">Drag point = move selected</span>
+          <span class="pill">Drag bars = set cosine</span>
+        </div>
+        <div class="actions">
+          <button id="seedDemoBtn">Seed demo tokens</button>
+          <button id="clearBtn">Clear all</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script type="module" src="./js/main.js"></script>
+</body>
+</html>
